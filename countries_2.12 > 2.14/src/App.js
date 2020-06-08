@@ -8,24 +8,37 @@ function App() {
     const [query, setQuery] = useState("");
     const [countries, setCountries] = useState([]);
     const [currentWeather, setCurrentWeather] = useState();
+    const [result, setResult] = useState([]);
 
-    const result = query ? countries.filter((country) => country.name.toLowerCase().includes(query.toLowerCase())) : [];
-    const api_key = process.env.REACT_APP_API_KEY;
     useEffect(() => {
         axios.get("https://restcountries.eu/rest/v2/all").then((res) => {
             setCountries(res.data);
         });
     }, []);
 
+    useEffect(() => {
+        const rs = query ? countries.filter((country) => country.name.toLowerCase().includes(query.toLowerCase())) : [];
+        setResult(rs);
+    }, [query, countries]);
+
+    useEffect(() => {
+        const api_key = process.env.REACT_APP_API_KEY;
+        if (result.length === 1) {
+            axios
+                .get(`http://api.weatherstack.com/current?access_key=${api_key}&query=${result[0].capital}`)
+                .then((res) => {
+                    console.log(res);
+                    setCurrentWeather(res.data.current);
+                })
+                .catch(function(err) {
+                    throw err;
+                });
+        }
+    }, [countries, query, result]);
+
     const handleQuery = (event) => {
         setQuery(event.target.value);
     };
-
-    // axios
-    //     .get(`http://api.weatherstack.com/current?access_key=${api_key}&query=${result[0].capital}`)
-    //     .then((res) => {
-    //         setCurrentWeather(res.data.current);
-    //     });
     return (
         <div className="App">
             <form>
@@ -59,7 +72,7 @@ function App() {
                         ))}
                     </ul>
                     <img src={result[0].flag} alt="flag" className="country_flag"></img>
-                    {/* {currentWeather && (
+                    {currentWeather && (
                         <>
                             <p>Temp: {currentWeather.temperature}</p>
                             <img src={currentWeather.weather_icons[0]} alt="flag" className="country_flag"></img>
@@ -67,7 +80,7 @@ function App() {
                                 Wind {currentWeather.wind_speed} {currentWeather.wind_dir}
                             </p>
                         </>
-                    )} */}
+                    )}
                 </>
             )}
         </div>
