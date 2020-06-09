@@ -48,8 +48,18 @@ const App = () => {
     };
     const handleSubmitForm = (event) => {
         event.preventDefault();
-        if (persons.filter((person) => person.name === newName).length > 0) {
+        const existingName = persons.filter((person) => person.name === newName);
+        if (existingName.length > 0) {
             alert(`${newName} is already added.`);
+            const {number, id} = existingName[0];
+            if (number !== newNumber) {
+                if (window.confirm("Replace existing number with new number?")) {
+                    const changedPerson = {...existingName[0], number: newNumber};
+                    personService.update(id, changedPerson).then((response) => {
+                        setPersons(persons.map((person) => (person.id !== id ? person : response)));
+                    });
+                }
+            }
         } else {
             const newPerson = {
                 name: newName,
