@@ -3,13 +3,15 @@ import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
 import personService from "./services/persons";
+import Notification from "./components/Notification";
+import "./App.css";
 
 const App = () => {
     const [persons, setPersons] = useState([]);
     const [newName, setNewName] = useState("");
     const [newNumber, setNewNumber] = useState("");
     const [query, setQuery] = useState("");
-
+    const [errorMessage, setErrorMessage] = useState(null);
     useEffect(() => {
         console.log("effect");
         personService.getAll().then((response) => {
@@ -57,6 +59,10 @@ const App = () => {
                     const changedPerson = {...existingName[0], number: newNumber};
                     personService.update(id, changedPerson).then((response) => {
                         setPersons(persons.map((person) => (person.id !== id ? person : response)));
+                        setErrorMessage(`Person '${response.name}' number was changed to ${response.number}`);
+                        setTimeout(() => {
+                            setErrorMessage(null);
+                        }, 5000);
                     });
                 }
             }
@@ -69,6 +75,10 @@ const App = () => {
                 setPersons(persons.concat(response));
                 setNewName("");
                 setNewNumber("");
+                setErrorMessage(`Person '${response.name}' was added`);
+                setTimeout(() => {
+                    setErrorMessage(null);
+                }, 5000);
             });
         }
     };
@@ -80,6 +90,7 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
+            <Notification message={errorMessage}></Notification>
             <Filter query={query} handleQuery={handleQuery}></Filter>
             <PersonForm {...{handleNameChange, handleNumberChange, handleSubmitForm, newName, newNumber}}></PersonForm>
             <h2>Numbers</h2>
