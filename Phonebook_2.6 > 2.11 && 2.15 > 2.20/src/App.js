@@ -12,6 +12,7 @@ const App = () => {
     const [newNumber, setNewNumber] = useState("");
     const [query, setQuery] = useState("");
     const [errorMessage, setErrorMessage] = useState(null);
+    const [isError, setIsError] = useState(false);
     useEffect(() => {
         console.log("effect");
         personService.getAll().then((response) => {
@@ -41,10 +42,19 @@ const App = () => {
                     personService.getAll().then((response) => {
                         console.log("promise fulfilled", response);
                         setPersons(response);
+                        setIsError(false);
+                        setErrorMessage(`Information of ${name} has been removed from the server`);
+                        setTimeout(() => {
+                            setErrorMessage(null);
+                        }, 5000);
                     });
                 })
                 .catch((err) => {
-                    console.log("fail", err);
+                    setIsError(true);
+                    setErrorMessage(`Information of ${name} has already been removed from the server`);
+                    setTimeout(() => {
+                        setErrorMessage(null);
+                    }, 5000);
                 });
         }
     };
@@ -59,6 +69,7 @@ const App = () => {
                     const changedPerson = {...existingName[0], number: newNumber};
                     personService.update(id, changedPerson).then((response) => {
                         setPersons(persons.map((person) => (person.id !== id ? person : response)));
+                        setIsError(false);
                         setErrorMessage(`Person '${response.name}' number was changed to ${response.number}`);
                         setTimeout(() => {
                             setErrorMessage(null);
@@ -75,6 +86,7 @@ const App = () => {
                 setPersons(persons.concat(response));
                 setNewName("");
                 setNewNumber("");
+                setIsError(false);
                 setErrorMessage(`Person '${response.name}' was added`);
                 setTimeout(() => {
                     setErrorMessage(null);
@@ -90,7 +102,7 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
-            <Notification message={errorMessage}></Notification>
+            <Notification message={errorMessage} isError={isError}></Notification>
             <Filter query={query} handleQuery={handleQuery}></Filter>
             <PersonForm {...{handleNameChange, handleNumberChange, handleSubmitForm, newName, newNumber}}></PersonForm>
             <h2>Numbers</h2>
