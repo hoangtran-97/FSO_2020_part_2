@@ -39,6 +39,7 @@ function App() {
     const handleQuery = (event) => {
         setQuery(event.target.value);
     };
+    console.log("rendered");
     return (
         <div className="App">
             <form>
