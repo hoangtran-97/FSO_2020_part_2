@@ -30,7 +30,22 @@ const App = () => {
     const handleNumberChange = (event) => {
         setNewNumber(event.target.value);
     };
-
+    const removePerson = (id, name) => {
+        console.log("removed", id);
+        if (window.confirm(`Do you really want to delete ${name} with an ID of ${id}`)) {
+            personService
+                .remove(id)
+                .then((res) => {
+                    personService.getAll().then((response) => {
+                        console.log("promise fulfilled", response);
+                        setPersons(response);
+                    });
+                })
+                .catch((err) => {
+                    console.log("fail", err);
+                });
+        }
+    };
     const handleSubmitForm = (event) => {
         event.preventDefault();
         if (persons.filter((person) => person.name === newName).length > 0) {
@@ -58,7 +73,7 @@ const App = () => {
             <Filter query={query} handleQuery={handleQuery}></Filter>
             <PersonForm {...{handleNameChange, handleNumberChange, handleSubmitForm, newName, newNumber}}></PersonForm>
             <h2>Numbers</h2>
-            <Persons result={result}></Persons>
+            <Persons result={result} removePerson={removePerson}></Persons>
         </div>
     );
 };
